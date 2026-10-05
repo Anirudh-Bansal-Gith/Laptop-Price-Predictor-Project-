@@ -13,11 +13,11 @@ venv/
 ENV/
 env/
 
-# Data files (raw datasets should not be tracked)
-data/raw/*.csv
+# Data files (allow bundled raw dataset)
 data/raw/*.zip
 data/raw/*.xlsx
 data/processed/*.csv
+!data/raw/laptop_price - dataset.csv
 
 # Serialized model artifacts
 models/*.pkl
