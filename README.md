@@ -1,8 +1,8 @@
 # Laptop Price Predictor: Machine Learning Scaffold and Production Architecture
 
-A modular, production-ready machine learning scaffold and microservice platform designed to estimate fair market valuations for laptops based on granular hardware specifications.
+A modular, production-ready machine learning project [currently a scaffold] and microservice platform designed to estimate fair market valuations for laptops based on granular hardware specifications.
 
-This repository serves as an extensible engineering foundation for data scientists and software engineers. It standardizes the entire machine learning lifecycle: data ingestion, feature decomposition, exploratory analysis, reproducible scikit-learn pipeline engineering, REST API serving via FastAPI, dual client frontends (Next.js 14 and Streamlit), containerization via Docker, and continuous integration via GitHub Actions.
+This repository aims to teach data science foundations to DSAI Club Members. It standardizes the entire machine learning lifecycle: data ingestion, feature decomposition, exploratory analysis, reproducible scikit-learn pipeline engineering, REST API serving via FastAPI, dual client frontends (Next.js 14 and Streamlit), containerization via Docker, and continuous integration via GitHub Actions.
 
 ---
 
