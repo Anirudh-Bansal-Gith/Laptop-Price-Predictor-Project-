@@ -4,6 +4,8 @@ A modular, production-ready machine learning project [currently a scaffold] and 
 
 This repository aims to teach data science foundations to DSAI Club Members. It standardizes the entire machine learning lifecycle: data ingestion, feature decomposition, exploratory analysis, reproducible scikit-learn pipeline engineering, REST API serving via FastAPI, dual client frontends (Next.js 14 and Streamlit), containerization via Docker, and continuous integration via GitHub Actions.
 
+
+Project Status: Folder Layout Ready, Actual Work yet to start.
 ---
 
 ## 1. System Architecture
