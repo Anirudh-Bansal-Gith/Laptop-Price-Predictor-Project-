@@ -1,9 +1,11 @@
 # Laptop Price Predictor: Machine Learning Scaffold and Production Architecture
 
-A modular, production-ready machine learning scaffold and microservice platform designed to estimate fair market valuations for laptops based on granular hardware specifications.
+A modular, production-ready machine learning project [currently a scaffold] and microservice platform designed to estimate fair market valuations for laptops based on granular hardware specifications.
 
-This repository serves as an extensible engineering foundation for data scientists and software engineers. It standardizes the entire machine learning lifecycle: data ingestion, feature decomposition, exploratory analysis, reproducible scikit-learn pipeline engineering, REST API serving via FastAPI, dual client frontends (Next.js 14 and Streamlit), containerization via Docker, and continuous integration via GitHub Actions.
+This repository aims to teach data science foundations to DSAI Club Members. It standardizes the entire machine learning lifecycle: data ingestion, feature decomposition, exploratory analysis, reproducible scikit-learn pipeline engineering, REST API serving via FastAPI, dual client frontends (Next.js 14 and Streamlit), containerization via Docker, and continuous integration via GitHub Actions.
 
+
+Project Status: Folder Layout Ready, Actual Work yet to start.
 ---
 
 ## 1. System Architecture
@@ -159,57 +161,24 @@ The data ingestion pipeline anticipates tabular specifications representing cons
 Raw technical specifications cannot be directly fed into regression estimators without structural transformation. `src/data/feature_engineering.py` implements the following domain transformations:
 
 ### 4.1 Pixels Per Inch (PPI)
-Display quality is dictated by pixel density rather than resolution or panel size in isolation. The diagonal pixel count is calculated using the Euclidean norm of horizontal ($x$) and vertical ($y$) resolution, divided by diagonal screen size ($d$):
 
-$$\text{PPI} = \frac{\sqrt{x^2 + y^2}}{d}$$
-
-```python
-def compute_ppi(res_x: int, res_y: int, screen_size: float) -> float:
-    if screen_size <= 0:
-        return 0.0
-    return float(np.sqrt(res_x**2 + res_y**2) / screen_size)
-```
 
 ### 4.2 Storage Decomposition
-Complex drive strings are parsed using regular expressions to decouple storage capacity by physical media type:
-- `ssd_gb`: Solid State Drive capacity in GB.
-- `hdd_gb`: Hard Disk Drive capacity in GB.
-- `flash_gb`: eMMC or Flash memory capacity in GB.
-- `hybrid_gb`: SSHD hybrid drive capacity in GB.
-- `total_storage_gb`: Sum of all secondary storage media.
+
 
 ### 4.3 Processor Performance Tiering
-CPUs are classified into ordinal performance tiers (`i9`, `i7`, `i5`, `i3`, `AMD_Performance`, `AMD_Budget`, `Budget`, `Other`) to reduce high cardinality in raw manufacturer model strings.
+
 
 ### 4.4 Hardware Flags
-- `has_dedicated_gpu`: Binary flag identifying discrete graphics chips from Nvidia and AMD versus integrated silicon (Intel UHD / Iris).
-- `is_touchscreen`: Binary indicator identifying digitizer display layers.
-- `is_ips`: Binary indicator identifying In-Plane Switching display panels.
-- `is_premium_brand`: Binary flag identifying premium product margins (Apple, Razer, Microsoft).
 
 ---
 
 ## 5. Machine Learning Pipeline Architecture
 
-The model uses a unified Scikit-Learn `Pipeline` coupled with a `ColumnTransformer` to eliminate training-serving skew:
-
-```
-[Raw Input Record]
-        │
-        ├──> Numerical Columns ───> StandardScaler() ────────────┐
-        │                                                        │
-        └──> Categorical Columns ─> OneHotEncoder(               ├──> [Estimator (XGBoost / RF)] ──> Price
-                                      handle_unknown='ignore',   │
-                                      sparse_output=False        │
-                                    ) ───────────────────────────┘
-```
 
 ### Feature Grouping Contract
 
-- **Numerical Features (15 attributes)**:
-  `screen_size`, `cpu_freq_ghz`, `ram_gb`, `ssd_gb`, `hdd_gb`, `total_storage_gb`, `weight_kg`, `res_x`, `res_y`, `ppi`, `is_touchscreen`, `is_ips`, `has_dedicated_gpu`, `is_premium_brand`, `screen_area`.
-- **Categorical Features (7 attributes)**:
-  `brand`, `type_name`, `cpu_brand`, `cpu_tier`, `gpu_brand`, `os_clean`, `primary_storage_type`.
+
 
 ### Evaluation Metrics
 
@@ -247,21 +216,7 @@ The FastAPI microservice serves the trained model using an OpenAPI 3.1 specifica
 - **Request Body**:
 ```json
 {
-  "brand": "Dell",
-  "processor_brand": "Intel",
-  "processor_name": "Core i7 8550U",
-  "ram_gb": 16,
-  "storage_gb": 512,
-  "storage_type": "SSD",
-  "gpu_brand": "Nvidia",
-  "screen_size": 15.6,
-  "resolution_x": 1920,
-  "resolution_y": 1080,
-  "is_touchscreen": false,
-  "os": "Windows",
-  "type_name": "Notebook",
-  "weight_kg": 2.1,
-  "cpu_freq_ghz": 2.8
+  
 }
 ```
 - **Response Body (`200 OK`)**:
@@ -274,9 +229,6 @@ The FastAPI microservice serves the trained model using an OpenAPI 3.1 specifica
 ```
 
 - **Error Codes**:
-  - `422 Unprocessable Entity`: Request body violates Pydantic schema validation boundaries.
-  - `503 Service Unavailable`: Serialized model file not found in `models/` directory.
-  - `500 Internal Server Error`: Feature transformation or estimator prediction failed during inference.
 
 ---
 
@@ -350,16 +302,7 @@ Accessible at `http://localhost:3000`.
 
 A multi-service Docker Compose configuration orchestrates the backend API, Next.js frontend, and Streamlit client in isolated networks.
 
-```bash
-# Build and run all services
-docker compose -f docker/docker-compose.yml up --build
 
-# Run in detached daemon mode
-docker compose -f docker/docker-compose.yml up -d
-
-# Terminate containers
-docker compose -f docker/docker-compose.yml down
-```
 
 ### Port Mapping Summary
 
@@ -371,37 +314,7 @@ docker compose -f docker/docker-compose.yml down
 
 ---
 
-## 9. Automated Testing and Static Analysis
 
-The repository uses `pytest` for test execution and `ruff` for fast static linting.
-
-```bash
-# Execute unit and integration tests
-pytest tests/ -v --tb=short
-
-# Run tests with code coverage report
-pytest tests/ --cov=src --cov=api --cov-report=term-missing
-
-# Execute Ruff static code analysis
-ruff check src/ api/ tests/
-```
-
-### Test Organization
-
-- `tests/test_cleaning.py`: Validates regex parsing of screen resolutions, compound storage drives, and operating system normalization.
-- `tests/test_feature_engineering.py`: Validates mathematical boundaries of the PPI calculation and categorical classification tiers.
-- `tests/test_model.py`: Validates feature vector formatting for model inference.
-- `tests/test_api.py`: Validates HTTP response codes, health status, and Pydantic validation failure boundaries (HTTP 422).
-
----
-
-## 10. Contributing and Coding Guidelines
-
-1. **Branching Model**: Create feature branches off `main` (`feature/your-feature-name` or `fix/issue-description`).
-2. **Type Annotations**: All Python modules must use standard PEP 484 type hints.
-3. **Docstring Standards**: Document all classes and functions following Google Python Style Guide docstring conventions.
-4. **Code Quality**: Ensure `ruff check` and `pytest` succeed before opening a pull request.
-5. **No Direct Model Commits**: Large binary artifacts (`.pkl`, `.joblib`) and datasets (`.csv`) must remain ignored by git.
 
 ---
 
